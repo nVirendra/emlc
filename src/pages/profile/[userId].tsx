@@ -11,12 +11,13 @@ import ProfileHeader from '../../components/profile/ProfileHeader';
 import UserPosts from '../../components/profile/UserPosts';
 import MainLayout from '../../layouts/MainLayout';
 import { likePost } from '../../services/post.service';
+import { UserProfile, UserPost } from '../../types/user'; // <--- import types
 
-const UserProfile = () => {
-  const { userId } = useParams();
+const UserProfilePage = () => {
+  const { userId } = useParams<{ userId: string }>();
   const { user } = useAuth();
-  const [profile, setProfile] = useState(null);
-  const [posts, setPosts] = useState([]);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [posts, setPosts] = useState<UserPost[]>([]);
 
   useEffect(() => {
     if (userId) {
@@ -26,26 +27,30 @@ const UserProfile = () => {
   }, [userId]);
 
   const handleFollow = async () => {
-    console.log('profile', profile);
     if (!profile) return;
-    const res = profile.isFollowing
-      ? await unfollowUser(userId)
-      : await followUser(userId);
-    setProfile((prev) => ({ ...prev, isFollowing: !prev.isFollowing }));
+
+    if (profile.isFollowing) {
+      await unfollowUser(userId!);
+    } else {
+      await followUser(userId!);
+    }
+
+    setProfile((prev) =>
+      prev ? { ...prev, isFollowing: !prev.isFollowing } : null
+    );
   };
 
   if (!profile) return <div>Loading...</div>;
 
-  const toggleLike = async (postId: number) => {
+  const toggleLike = async (postId: string) => {
     try {
-      // Optimistic update
       setPosts((prev) =>
         prev.map((post) =>
           post._id === postId
             ? {
                 ...post,
                 likes: post.likes.includes(user.id)
-                  ? post.likes.filter((id: string) => id !== user.id)
+                  ? post.likes.filter((id) => id !== user.id)
                   : [...post.likes, user.id],
                 liked: !post.likes.includes(user.id),
               }
@@ -53,17 +58,18 @@ const UserProfile = () => {
         )
       );
 
-      await likePost(postId.toString());
+      await likePost(postId);
     } catch (error) {
       console.error('Error liking post:', error);
-      // Revert on error
+
+      // Optional: Revert logic (can be removed if server syncs later)
       setPosts((prev) =>
         prev.map((post) =>
           post._id === postId
             ? {
                 ...post,
                 likes: post.likes.includes(user.id)
-                  ? post.likes.filter((id: string) => id !== user.id)
+                  ? post.likes.filter((id) => id !== user.id)
                   : [...post.likes, user.id],
                 liked: !post.likes.includes(user.id),
               }
@@ -87,4 +93,4 @@ const UserProfile = () => {
   );
 };
 
-export default UserProfile;
+export default UserProfilePage;

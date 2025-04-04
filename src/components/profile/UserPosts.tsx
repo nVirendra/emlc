@@ -1,45 +1,34 @@
 import React from 'react';
 import PostCard from '../post/PostCard';
 import { useAuth } from '../../context/AuthContext';
-
-interface Comment {
-  name: string;
-  comment: string;
-}
-
-interface Post {
-  id: number;
-  user: string;
-  content: string;
-  privacy: string;
-  image?: string;
-  likes: number;
-  liked: boolean;
-  comments: Comment[];
-}
+import { FeedPost, Comment } from '../../types/feedpost';
 
 interface UserPostsProps {
   posts: any[];
-  toggleLike: (id: number) => void;
+  toggleLike: (id: string) => Promise<void>;
 }
 
 const UserPosts: React.FC<UserPostsProps> = ({ posts, toggleLike }) => {
   const { user } = useAuth();
 
-  // Normalize post data to match PostCard's expected format
-  const normalizedPosts = posts.map((post) => ({
+  const normalizedPosts: FeedPost[] = posts.map((post) => ({
     id: post._id,
     user: post.userId?.name || 'Unknown User',
+    userId: post.userId?._id || '',
     content: post.content,
     image: post.mediaType === 'image' ? post.mediaUrl : '',
+    video: post.mediaType === 'video' ? post.mediaUrl : '',
     privacy: post.privacy,
     likes: post.likes?.length || 0,
-    liked: post.likes?.includes(user.id) || false,
+    liked: post.likes?.includes(user?.id) || false,
     comments:
-      post.comments?.map((c: any) => ({
-        name: c.userId?.name || 'User',
-        comment: c.comment,
-      })) || [],
+      post.comments?.map(
+        (c: any): Comment => ({
+          name: c.userId?.name || 'User',
+          comment: c.comment,
+        })
+      ) || [],
+    createdAt: post.createdAt,
   }));
 
   return (
