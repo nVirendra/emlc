@@ -3,26 +3,11 @@ import { FiHeart, FiMessageSquare, FiLock, FiGlobe } from 'react-icons/fi';
 import defaultUser from '/src/assets/default-user.png';
 import { commentPost } from '../../services/post.service';
 import { useAuth } from '../../context/AuthContext';
-
-interface Comment {
-  name: string;
-  comment: string;
-}
-
-interface Post {
-  id: number;
-  user: string;
-  content: string;
-  privacy: string;
-  image?: string;
-  likes: number;
-  liked: boolean;
-  comments: Comment[];
-}
+import { Comment, FeedPost } from '../../types/feedpost';
 
 interface PostCardProps {
-  post: Post;
-  toggleLike: (id: number) => void;
+  post: FeedPost;
+  toggleLike: (id: string) => Promise<void>;
 }
 
 const PostCard: React.FC<PostCardProps> = ({ post, toggleLike }) => {
@@ -89,7 +74,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, toggleLike }) => {
       {/* Action Buttons */}
       <div className="flex items-center gap-6 text-gray-500 pt-4 border-t border-gray-100 dark:border-gray-700">
         <button
-          onClick={() => toggleLike(post.id)}
+          onClick={() => toggleLike(String(post.id))}
           className="flex items-center gap-2 group"
         >
           <div className="p-2 rounded-full transition-colors group-hover:bg-purple-100 dark:group-hover:bg-gray-700">

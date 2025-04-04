@@ -4,24 +4,10 @@ import CreatePost from '../../pages/post/CreatePost';
 import { fetchFeed, likePost } from '../../services/post.service';
 import { useAuth } from '../../context/AuthContext';
 import { sendNotification } from '../../lib/triggerNotification';
-
-interface Post {
-  id: string;
-  user: string;
-  userId: string;
-  content: string;
-  image: string;
-  video?: string;
-  privacy: string;
-  likes: number;
-  liked: boolean;
-  comments: { name: string; comment: string }[];
-  createdAt: string;
-}
-
+import { FeedPost } from '../../types/feedpost';
 const Feed: React.FC = () => {
   const { user } = useAuth();
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [posts, setPosts] = useState<FeedPost[]>([]);
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -54,7 +40,7 @@ const Feed: React.FC = () => {
   }, []);
 
   const handlePostCreated = (newPostRaw: any) => {
-    const newPost: Post = {
+    const newPost: FeedPost = {
       id: newPostRaw._id,
       user: newPostRaw.userId?.name || 'Unknown User',
       userId: newPostRaw.userId?._id || '',
@@ -73,7 +59,7 @@ const Feed: React.FC = () => {
 
   const toggleLike = async (id: string) => {
     const currentUser = user;
-    let receiverId: string | null = null;
+    let receiverId: string | undefined;
 
     try {
       setPosts((prev) =>
