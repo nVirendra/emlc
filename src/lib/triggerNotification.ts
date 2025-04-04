@@ -1,3 +1,5 @@
+import API from '../services/api';
+
 export const sendNotification = async ({
   senderId,
   receiverId,
@@ -7,9 +9,9 @@ export const sendNotification = async ({
   receiverId: string;
   postId: string;
 }) => {
-  await fetch('http://localhost:5000/api/notifications', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ senderId, receiverId, postId }),
+  return API.post('/notifications', {
+    senderId,
+    receiverId,
+    postId,
   });
 };
