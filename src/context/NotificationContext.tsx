@@ -21,14 +21,17 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     if (!socket) return;
 
-    socket.on('new-notification', (notification: Notification) => {
+    const handleNotification = (notification: Notification) => {
+      console.log('📥 New notification received:', notification);
       setNotifications((prev) => [notification, ...prev]);
-    });
+    };
+
+    socket.on('new-notification', handleNotification);
 
     return () => {
-      socket.off('new-notification');
+      socket.off('new-notification', handleNotification);
     };
-  }, [socket]);
+  }, [socket]); // 👈 crucial!
 
   return (
     <NotificationContext.Provider value={{ notifications, setNotifications }}>
